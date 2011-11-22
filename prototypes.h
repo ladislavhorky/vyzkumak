@@ -1,6 +1,8 @@
 #ifndef __VYZKUM_PROTOTYPES__
 #define __VYZKUM_PROTOTYPES__
 
+/*We MINIMIZE in whole program!*/
+
 template<int,typename,int,typename> class candidate;
 template<int,typename,int,typename> class selectionMethod;
 template<int,typename,int,typename> class abstractPopulation;

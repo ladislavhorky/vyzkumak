@@ -10,9 +10,14 @@ class abstractPopulation{
 
 	unsigned const populationSize, mateSize, offspringSize, bestArcSize;
 	specCandidate **pop, **mate, **offspr, **best;
-	double gridStep,vectorLimit;	//?
+	double gridStep;	//?
+
+	vectorType upperLimit[dim],lowerLimit[dim];
 
 	template<int,typename,int,typename> friend class selectionMethod;
+	template<int,typename,int,typename> friend class evaluationMethod;
+	template<int,typename,int,typename> friend class mutationMethod;
+	template<int,typename,int,typename> friend class mergingMethod;
 public:
 	abstractPopulation<dim,vectorType,evalDim,evalType>(unsigned pSize, unsigned mSize, unsigned oSize, unsigned bestA):
 	  populationSize(pSize),mateSize(mSize),offspringSize(oSize),bestArcSize(bestA){
@@ -29,5 +34,8 @@ public:
 	const specCandidate *GetBestCandidate(const int idx) const {return (best[idx]);}
 };
 
+
+template<int dim, typename vectorType, int evalDim, typename evalType>
+class annealingPopulation : public abstractPopulation{
 
 #endif
