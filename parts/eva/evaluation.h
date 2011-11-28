@@ -1,7 +1,7 @@
 #ifndef __VYZKUM_EVAL__
 #define __VYZKUM_EVAL__
 
-#include<vyzkumak\prototypes.h>
+#include<vyzkumak\topLevelHeader.h>
 #include<iostream>
 #include<iomanip>
 #include<math.h>
@@ -10,18 +10,14 @@ using namespace std;
 
 
 template<int dim, typename vectorType, int evalDim, typename evalType>
-class evaluationMethod{
-public:
-	typedef candidate<dim,vectorType,evalDim,evalType> specCandidate;
-private:
-	inline int EvaluateSet(specCandidate *set, int size){};
-public:
-	typedef abstractPopulation<dim,vectorType,evalDim,evalType> specAbstractPopulation;
+class evaluationMethod : public initializablePart<dim,vectorType,evalDim,evalType>{
 
-	static int Init(const specAbstractPopulation *p){};
-	static int EvaluatePopulation(const specAbstractPopulation *p, bool initial=false){
+	virtual int EvaluateSet(specCandidate **set, int size) = 0;
+public:
+	int PerformEvaluation(bool initial=false){
 		if(initial) EvaluateSet(p->pop,p->populationSize);
 		else EvaluateSet(p->offspr,p->offspringSize);
+		return 1;
 	}
 };
 
@@ -32,7 +28,7 @@ class inverseHilbMtrxNorm: public evaluationMethod<dim,vectorType,evalDim,evalTy
 		//{H11,H12,...,H1n,H21,...,H2n, ... ,Hnn}
 	static signed long *inverseHilbert;
 
-	inline int EvaluateSet(specCandidate *set, int size){
+	int EvaluateSet(specCandidate **set, int size){
 		double norm, sum;
 		for(int i=0; i < size; i++){
 			//compute norm od H^(-1)x
@@ -47,9 +43,10 @@ class inverseHilbMtrxNorm: public evaluationMethod<dim,vectorType,evalDim,evalTy
 			}
 			set[i]->evaluation[0] = sqrt(norm);
 		}
+		return 1;
 	}
 
-	static long comb(long n, long k){
+	long comb(long n, long k){
 		long res=1;
 		if(n<0 || k<0) return 1;
 		if(k < n-k) k = n-k;	//symetry
@@ -59,9 +56,13 @@ class inverseHilbMtrxNorm: public evaluationMethod<dim,vectorType,evalDim,evalTy
 		return res;
 	}
 public:
-	static int Init(const specAbstractPopulation *p){
+	int Init(specAbstPopulation *pop){
 		if(evalDim != 1) return BAD_EVAL_DIM;
-		//create Hilbert inverse
+		//initialize p
+		p=pop;
+		//create Hilbert inverse if not already created
+		if(inverseHilbert != NULL) return 1;
+
 		signed long tmp;
 		inverseHilbert = new signed long[dim*dim];
 		for(int i=1; i<dim+1; i++){
