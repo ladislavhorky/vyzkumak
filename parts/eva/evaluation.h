@@ -1,7 +1,7 @@
 #ifndef __VYZKUM_EVAL__
 #define __VYZKUM_EVAL__
 
-#include<vyzkumak\topLevelHeader.h>
+#include<vyzkumak/topLevelHeader.h>
 #include<iostream>
 #include<iomanip>
 #include<math.h>
@@ -11,6 +11,15 @@ using namespace std;
 
 template<int dim, typename vectorType, int evalDim, typename evalType>
 class evaluationMethod : public initializablePart<dim,vectorType,evalDim,evalType>{
+public:
+	typedef abstractPopulation<dim,vectorType,evalDim,evalType> specAbstPopulation;
+	typedef candidate<dim,vectorType,evalDim,evalType> specCandidate;
+	typedef initializablePart<dim,vectorType,evalDim,evalType> specInitializable;
+
+protected:
+	using specInitializable::p;
+	//using specAbstPopulation::offspringSize;
+	//using specAbstPopulation::pop;
 
 	virtual int EvaluateSet(specCandidate **set, int size) = 0;
 public:
@@ -25,6 +34,14 @@ public:
 
 template<int dim, typename vectorType, int evalDim, typename evalType>
 class inverseHilbMtrxNorm: public evaluationMethod<dim,vectorType,evalDim,evalType>{
+public:
+	typedef abstractPopulation<dim,vectorType,evalDim,evalType> specAbstPopulation;
+	typedef candidate<dim,vectorType,evalDim,evalType> specCandidate;
+	typedef initializablePart<dim,vectorType,evalDim,evalType> specInitializable;
+
+private:
+	using specInitializable::p;
+
 		//{H11,H12,...,H1n,H21,...,H2n, ... ,Hnn}
 	static signed long *inverseHilbert;
 

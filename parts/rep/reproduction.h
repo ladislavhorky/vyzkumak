@@ -1,7 +1,7 @@
 #ifndef __VYZKUM_REPRODUCTION__
 #define __VYZKUM_REPRODUCTION__
 
-#include<vyzkumak\topLevelHeader.h>
+#include<vyzkumak/topLevelHeader.h>
 #include<stdlib.h>
 #include<time.h>
 
@@ -18,6 +18,14 @@ public:
 
 template<int dim, typename vectorType, int evalDim, typename evalType>
 class plainCopyReproduction : public reproductionMethod<dim,vectorType,evalDim,evalType>{
+public:
+	typedef abstractPopulation<dim,vectorType,evalDim,evalType> specAbstPopulation;
+	typedef candidate<dim,vectorType,evalDim,evalType> specCandidate;
+	typedef initializablePart<dim,vectorType,evalDim,evalType> specInitializable;
+
+private:
+	using specInitializable::p;
+
 public:
 	int PerformReproduction(){
 		if(p->mateSize != p->offspringSize) return PARAMETER_MISMATCH;

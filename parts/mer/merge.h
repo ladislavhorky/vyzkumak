@@ -1,7 +1,7 @@
 #ifndef __VYZKUM_MERGE__
 #define __VYZKUM_MERGE__
 
-#include<vyzkumak\topLevelHeader.h>
+#include<vyzkumak/topLevelHeader.h>
 #include<stdlib.h>
 #include<time.h>
 #include<math.h>
@@ -15,6 +15,14 @@ class mergingMethod : public initializablePart<dim,vectorType,evalDim,evalType>{
 
 template<int dim, typename vectorType, int evalDim, typename evalType>
 class fightParent : public mergingMethod<dim,vectorType,evalDim,evalType>{
+public:
+	typedef abstractPopulation<dim,vectorType,evalDim,evalType> specAbstPopulation;
+	typedef candidate<dim,vectorType,evalDim,evalType> specCandidate;
+	typedef initializablePart<dim,vectorType,evalDim,evalType> specInitializable;
+
+private:
+	using specInitializable::p;
+
 public:
 
 	int PerformMerge(){
@@ -35,6 +43,13 @@ public:
 
 template<int dim, typename vectorType, int evalDim, typename evalType>
 class fightPopulation : public mergingMethod<dim,vectorType,evalDim,evalType>{
+public:
+	typedef abstractPopulation<dim,vectorType,evalDim,evalType> specAbstPopulation;
+	typedef candidate<dim,vectorType,evalDim,evalType> specCandidate;
+	typedef initializablePart<dim,vectorType,evalDim,evalType> specInitializable;
+
+private:
+	using specInitializable::p;
 
 	int qsort(unsigned first, unsigned last){
 	/*
@@ -82,6 +97,14 @@ public:
 
 template<int dim, typename vectorType, int evalDim, typename evalType>
 class fightParentAnnealing : public mergingMethod<dim,vectorType,evalDim,evalType>{
+public:
+	typedef abstractAnnealingPopulation<dim,vectorType,evalDim,evalType> specAbstAnnePopulation;
+	typedef candidate<dim,vectorType,evalDim,evalType> specCandidate;
+	typedef initializablePart<dim,vectorType,evalDim,evalType> specInitializable;
+
+private:
+	using specInitializable::p;
+
 public:
 
 	int Init(specAbstAnnePopulation *pop){ //we need temperature

@@ -1,7 +1,9 @@
 #ifndef __VYZKUM_POPULATION__
 #define __VYZKUM_POPULATION__
 
-#include<vyzkumak\topLevelHeader.h>
+#include<vyzkumak/topLevelHeader.h>
+#include<stdlib.h>
+#include<time.h>
 
 template<int dim, typename vectorType, int evalDim, typename evalType>
 class abstractPopulation{
@@ -54,16 +56,18 @@ public:
 
 
 
-template<int dim, typename vectorType, int evalDim, typename evalType, template<int,typename,int,typename> class selectionMethod, 
-	template<int,typename,int,typename> class evaluationMethod, template<int,typename,int,typename> class mutationMethod,
-	template<int,typename,int,typename> class mergingMethod, template<int,typename,int,typename> class reproductionMethod>
+template<int dim, typename vectorType, int evalDim, typename evalType, template<int,typename,int,typename> class _selectionMethod, 
+	template<int,typename,int,typename> class _evaluationMethod, template<int,typename,int,typename> class _mutationMethod,
+	template<int,typename,int,typename> class _mergingMethod, template<int,typename,int,typename> class _reproductionMethod>
 class basicAnnealingPopulation : public abstractAnnealingPopulation<dim,vectorType,evalDim,evalType>{
 public:
-	typedef selectionMethod<dim,vectorType,evalDim,evalType> specSelMethod;
-	typedef mutationMethod<dim,vectorType,evalDim,evalType> specMutMethod;
-	typedef reproductionMethod<dim,vectorType,evalDim,evalType> specRepMethod;
-	typedef evaluationMethod<dim,vectorType,evalDim,evalType> specEvaMethod;
-	typedef mergingMethod<dim,vectorType,evalDim,evalType> specMerMethod;
+	typedef _selectionMethod<dim,vectorType,evalDim,evalType> specSelMethod;
+	typedef _mutationMethod<dim,vectorType,evalDim,evalType> specMutMethod;
+	typedef _reproductionMethod<dim,vectorType,evalDim,evalType> specRepMethod;
+	typedef _evaluationMethod<dim,vectorType,evalDim,evalType> specEvaMethod;
+	typedef _mergingMethod<dim,vectorType,evalDim,evalType> specMerMethod;
+	typedef abstractPopulation<dim,vectorType,evalDim,evalType> specAbstPopulation;
+	typedef candidate<dim,vectorType,evalDim,evalType> specCandidate;
 
 private:
 	specSelMethod sel;
@@ -72,17 +76,25 @@ private:
 	specEvaMethod eva;
 	specMerMethod mer;
 
+protected:
+	using specAbstPopulation::populationSize;
+	using specAbstPopulation::offspringSize;
+	using specAbstPopulation::pop;
+	using specAbstPopulation::upperLimit;
+	using specAbstPopulation::lowerLimit;
+	//using specAbstPopulation::specCandidate;
 public:
 	basicAnnealingPopulation<dim,vectorType,evalDim,evalType,
-		selectionMethod,evaluationMethod,
-		mutationMethod,mergingMethod,
-		reproductionMethod>(unsigned pSize, unsigned mSize, unsigned oSize, unsigned bestA, double t) :
+		_selectionMethod,_evaluationMethod,
+		_mutationMethod,_mergingMethod,
+		_reproductionMethod>(unsigned pSize, unsigned mSize, unsigned oSize, unsigned bestA, double t) :
 		abstractAnnealingPopulation<dim,vectorType,evalDim,evalType>(pSize,mSize,oSize,bestA,t){}
 
 	bool Create(){
 		for(unsigned i=0; i<populationSize+offspringSize; i++){
 			pop[i] = new specCandidate;
 		}
+		srand((unsigned)time(NULL));
 		for(unsigned i=0; i<populationSize; i++){
 			for(unsigned j=0; j<dim; j++) 
 				pop[i]->components[j] = (int)((upperLimit[j]-lowerLimit[j])*(float)(rand()/RAND_MAX) + lowerLimit[j]);

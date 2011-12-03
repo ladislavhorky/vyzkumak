@@ -1,7 +1,7 @@
 #ifndef __VYZKUM_CANDIDATE__
 #define __VYZKUM_CANDIDATE__
 
-#include<vyzkumak\topLevelHeader.h>
+#include<vyzkumak/topLevelHeader.h>
 
 template<int dim, typename vectorType, int evalDim, typename evalType>
 class candidate{

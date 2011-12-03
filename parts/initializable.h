@@ -1,7 +1,7 @@
 #ifndef __VYZKUM_INITIALIZABLE__
 #define __VYZKUM_INITIALIZABLE__
 
-#include<vyzkumak\population.h>
+#include<vyzkumak/population.h>
 
 /*
 	Contains parent of all parts containing all 
