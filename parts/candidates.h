@@ -23,7 +23,7 @@ public:
 
 /*
 	for now (?) in single-objective optimization 
-	we think evaluation and fitness are the same 
+	we think as evaluation and fitness are the same 
 */
 
 template<int dim, typename vectorType, typename evalType>
