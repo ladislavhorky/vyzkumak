@@ -12,17 +12,17 @@
 #include <vyzkumak/errors.h>
 
 //pop include
-#include <vyzkumak/parts/candidates.h>
+#include <vyzkumak/stage/candidates.h>
 #include <vyzkumak/population.h>
 
-#include<vyzkumak/parts/initializable.h>
+#include<vyzkumak/stage/initializable.h>
 
-//parts
-#include <vyzkumak/parts/eva/evaluation.h>
-#include <vyzkumak/parts/mer/merge.h>
-#include <vyzkumak/parts/mut/mutation.h>
-#include <vyzkumak/parts/sel/selection.h>
-#include <vyzkumak/parts/rep/reproduction.h>
+//stages
+#include <vyzkumak/stage/eva/evaluation.h>
+#include <vyzkumak/stage/mer/merge.h>
+#include <vyzkumak/stage/mut/mutation.h>
+#include <vyzkumak/stage/rep/sel/selection.h>
+#include <vyzkumak/stage/rep/reproduction.h>
 
 //additionals
 #include <vyzkumak/probability.h>
