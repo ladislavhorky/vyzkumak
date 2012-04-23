@@ -113,19 +113,59 @@ class inverseHilbMtrxNorm: public evaluationMethod<dim,vectorType,evalType>{
 template<int dim, typename vectorType, typename evalType>
 signed long *inverseHilbMtrxNorm<dim,vectorType,evalType>::inverseHilbert = NULL;
 
-//------------------BIA evaluation -----------------------------
+
+//------------------BIA evaluation ------------------------------=====================================================
 
 
 template<int dim, typename vectorType, typename evalType>
 class moleculePotentialEnergy: public evaluationMethod<dim,vectorType,evalType>{
-	int dist[5];
+	static const int dist[81];
+
+	//get target distance between points x-th and y-th (represented in candidate by 
+	//TWO coordinates) from matrix
+	inline long GetDist(unsigned x, unsigned y){return dist[x*(dim/2) + y];}
 
 	public:
 	moleculePotentialEnergy<dim,vectorType,evalType>(){};
 
 	int EvaluateSet(specSingleObjCandidate **set, int size){
+		double strain;
+		double dist1,dist2;
+		unsigned i,j,k;
+		for(i=0;i<size;i++){
+			strain = 0;
+			for(j=0;j<dim/2;j++){
+				for(k=j+1;k<dim/2;k++){
+					//if not connected, don't care
+					if(!GetDist(j,k)) continue;
+					//compute euclidean dist
+					dist1 = set[i]->components[2*j]-set[i]->components[2*k];
+					dist2 =	set[i]->components[2*j+1]-set[i]->components[2*k+1];
+					//compute strain
+					strain += abs(sqrt(dist1*dist1 + dist2*dist2) - GetDist(j,k));
+				}
+			}
+			set[i]->fitness = strain;
+		}
 		return 1;
 	}
 };
+
+//non-negative, symetric
+template<int dim, typename vectorType, typename evalType>
+const int moleculePotentialEnergy<dim,vectorType,evalType>::dist[] =
+{0,  200,0,  0,  0,  0,  200,0,  0,
+ 200,0,  200,0,  200,0,  0,  0,	 0,
+ 0,  200,0,  200,200,0,  0,  0,  0,
+ 0,  0,  200,0,  200,200,0,  200,0,
+ 0,  200,200,200,0,  200,0,  0,  200,
+ 0,  0,  0,  200,200,0,  200,0,  0,
+ 200,0,  0,  0,  0,  200,0,  0,	 200,
+ 0,  0,  0,  200,0,  0,  0,  0,  0,
+ 0,  0,  0,  0,  200,0,  200,0,  0};
+
+/*{	  0,  100,  100,
+	100,    0,  100,
+	100,  100,    0};*/
 
 #endif

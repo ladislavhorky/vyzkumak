@@ -6,6 +6,8 @@
 #include<time.h>
 #include<math.h>
 
+#define INSERTION_SORT_TRESHOLD 5
+
 template<int dim, typename vectorType, typename evalType>
 class mergingMethod{
 	public: 
@@ -62,60 +64,103 @@ class fightPopulation : public mergingMethod<dim,vectorType,evalType>{
 	//typedef candidate<dim,vectorType,evalDim,evalType> specCandidate;
 	//typedef initializablePart<dim,vectorType,evalDim,evalType> specInitializable;
 
-	private:
-	//using specInitializable::p;
-
-	int qsort(unsigned first, unsigned last){
+	protected:
+	int qsortPartial(unsigned first, unsigned last, unsigned split){
 	/*
-		modified qsort - partially sorts first popSize values (in ascending order!)
-		last-first is supposed to be > 1
+		Sorts in ascending order!!
+		Modified qsort - partially sorts array from indice 'first' to indice 'last'
+		splitting it into two partially ordered subarrays where first subarray 
+		is 'split' long. Last-first is supposed to be > 1
 	*/
 		specSingleObjCandidate *tmp;
 
-		//find median of 3
-		if(FIT(first) > FIT(first+1)) SWAP(first,first+1);
-		if(FIT(first) > FIT(last)) SWAP(first,last);
-		if(FIT(first+1) > FIT(last)) SWAP(first+1,last);
-
 		//run qsort
 		unsigned pivot, rising, falling;
+		unsigned targetPos = first + split;
+		evalType pivotFit;
 		while(1){
-			pivot=first;
-			rising=first+1;
-			falling=last;
+			//find median of 3 (to be on first+1 pos)
+			if(FIT(first) > FIT(last)) SWAP(first,last);
+			if(FIT(first) > FIT(first+1)) SWAP(first,first+1);
+			if(FIT(first+1) > FIT(last)) SWAP(first+1,last);
+		
+			pivotFit = FIT(first+1);//pivot is at 'first+1' pos (first is already smaller)
+			rising = first+1;	//will be immediatelly incremented
+			falling= last;	//will be immediatelly decremented but last is greated than pivot so OK
 			while(1){
-				do falling--; while(FIT(falling) < FIT(pivot));		//thanks to med. no need to check underrun
+				do falling--; while(FIT(falling) > pivotFit);	//thanks to med. no need to check underrun
 				//rise until first element >= pivot is found
-				do rising++; while(FIT(rising) > FIT(pivot));		//also, no overrun check
+				do rising++; while(FIT(rising) < pivotFit);		//also, no overrun check
 				//done and continue or swap and go again
 				if(rising > falling){	
-					SWAP(pivot,falling);
+					SWAP(first+1,falling);	//first+1=pivot index
 					break;
 				}else{					
 					SWAP(rising,falling);
 				}
 			}
 			//check and end/run again
-			if((pivot == popSize)||(pivot == popSize-1)) return 1;
-			else if(pivot > popSize) last = pivot-1;
-			else first = pivot+1;
+			if((falling == targetPos)||(falling == targetPos-1)){return 1;}
+			else if(falling > targetPos) last = falling-1; //pivot-1;
+			else first = falling+1; //pivot+1;
 		}
+	}
+
+	//sorts first cnt candidates in ascending order by insertion sort
+	int insertionSortPartial(unsigned first, unsigned last, unsigned cnt){
+		evalType minFit;
+		unsigned minIdx, i,j;
+		specSingleObjCandidate *tmp;
+
+		for(i=0;i<cnt;i++){
+			minIdx = i+first;
+			minFit = FIT(minIdx);
+			for(j=first+i+1; j<=last; j++){
+				if(FIT(j) < minFit){
+					minIdx = j; minFit = FIT(minIdx);
+				}
+			}
+			SWAP(minIdx,i+first);
+		}
+		return 1;
 	}
 
 	public:
 	int PerformMerge(){	//modified qsort
-		qsort(0, popSize + offsprSize - 1);
+		qsortPartial(0, popSize + offsprSize - 1,popSize);
 		return 1;
 	}
 };
 
 //------------------BIA merge -----------------------------
 
-template<int dim, typename vectorType, typename evalType>
-class elitismMerge : public mergingMethod<dim,vectorType,evalType>{
+/*
+Merges pop and offspr so that elite from pop is preserved and the rest of pop is replaced
+with best offspring. It inherits fightPopulation so that it can use quicksort
+
+eliteCount determines elite volume
+*/
+template<int dim, typename vectorType, typename evalType, int eliteCount>
+class elitismMerge : public fightPopulation<dim,vectorType,evalType>{
 	
 	public: 
 	int PerformMerge(){
+		//sort out elites in pop and popSize-eliteCount in offstr
+		if(eliteCount < INSERTION_SORT_TRESHOLD) insertionSortPartial(0,popSize-1,eliteCount);
+		else qsortPartial(0,popSize-1,eliteCount);
+		//also include treshold ??
+		qsortPartial(popSize,popSize+offsprSize-1,popSize-eliteCount);
+
+		specSingleObjCandidate *tmp;
+		/*
+		preserve elite and SWAP the rest -- otherwise some pointers would 
+		be duplicit and pop would be corrupted
+		*/
+		for(unsigned i=eliteCount, j=0; i<popSize; i++,j++){
+			tmp = pop[i];
+			pop[i] = offspr[j];
+			offspr[j] = tmp;
+		}
 		return 1;
 	}
 };
