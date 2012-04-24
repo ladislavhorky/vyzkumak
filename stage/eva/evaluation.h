@@ -142,10 +142,35 @@ class moleculePotentialEnergy: public evaluationMethod<dim,vectorType,evalType>{
 					dist1 = set[i]->components[2*j]-set[i]->components[2*k];
 					dist2 =	set[i]->components[2*j+1]-set[i]->components[2*k+1];
 					//compute strain
+					//quadratic strain
+					//strain += abs(dist1*dist1 + dist2*dist2 - GetDist(j,k)*GetDist(j,k));
+					// linear strain
 					strain += abs(sqrt(dist1*dist1 + dist2*dist2) - GetDist(j,k));
 				}
 			}
 			set[i]->fitness = strain;
+		}
+		//do basic niching -- if two candidates in offspring are totally same,
+		//let only one of them survive
+		evalType currFit;
+		bool different;
+		for(i=0;i<size;i++){
+			//just forward search, so that last of its kind survives
+			currFit = set[i]->fitness;
+			for(j=i+1;j<size;j++){
+				if(set[j]->fitness != currFit) continue;
+				//check atoms coordinates
+				different=false;
+				for(k=0; k<dim; k++){
+					if(set[i]->components[k] != set[j]->components[k]){
+						different=true; break;
+					}
+				}
+				//dont match
+				if(different) continue;
+				//if totally match, set i-th fitness to some high val
+				set[i]->fitness = 10000000000;
+			}
 		}
 		return 1;
 	}
@@ -158,11 +183,11 @@ const int moleculePotentialEnergy<dim,vectorType,evalType>::dist[] =
  200,0,  200,0,  200,0,  0,  0,	 0,
  0,  200,0,  200,200,0,  0,  0,  0,
  0,  0,  200,0,  200,200,0,  200,0,
- 0,  200,200,200,0,  200,0,  0,  200,
+ 0,  200,200,200,0,  200,0,  0,  300,
  0,  0,  0,  200,200,0,  200,0,  0,
  200,0,  0,  0,  0,  200,0,  0,	 200,
  0,  0,  0,  200,0,  0,  0,  0,  0,
- 0,  0,  0,  0,  200,0,  200,0,  0};
+ 0,  0,  0,  0,  300,0,  200,0,  0};
 
 /*{	  0,  100,  100,
 	100,    0,  100,

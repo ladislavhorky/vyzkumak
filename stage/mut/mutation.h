@@ -99,6 +99,28 @@ class gaussianDisplace : public mutationMethod<dim,vectorType>{
 			for(int j=0; j<dim; j+=2) offspr[i]->components[j] -= wx;
 			for(int j=1; j<dim; j+=2) offspr[i]->components[j] -= wy;
 		}
+
+		//and randomly rotate with mutation rate -- just try
+		double rotM[4], phi;
+		vectorType oldx, oldy;
+		for(int i=0; i<offsprSize; i++){
+			if((rand() % 100) > mutRate) continue; // no mutation
+			//init rotation matrix
+			R = sqrt(-2*log((double)rand()/RAND_MAX))*0.2;
+			theta = 2*PI*(double)rand()/RAND_MAX;
+			//phi with normal distribution.. 0.1 ~ 6 deg.
+			phi = R*cos(theta);
+			rotM[0]=rotM[3] = cos(phi);
+			rotM[1] = -sin(phi);
+			rotM[2] = -rotM[1];
+			//rotate every point
+			for(int j=0;j<dim/2;j++){
+				oldx = offspr[i]->components[2*j];
+				oldy = offspr[i]->components[2*j+1];
+				offspr[i]->components[2*j] =  rotM[0]*oldx + rotM[1]*oldy;
+				offspr[i]->components[2*j+1] =rotM[2]*oldx + rotM[3]*oldy;
+			}
+		}
 		return 1;
 	}
 };

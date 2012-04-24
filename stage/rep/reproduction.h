@@ -52,7 +52,8 @@ class plainCopyReproduction : public reproductionMethod<dim,vectorType,evalType,
 //-----------------------BIA repro-----------------------------
 
 //classic GO reproduction with 2-tournalent selection and n-point crossover
-template<int dim, typename vectorType, typename evalType, int mateSize, template<int,typename,typename,int> class _selectionMethod>
+template<int dim, typename vectorType, typename evalType, int mateSize, 
+	template<int,typename,typename,int> class _selectionMethod,int parasitismRate>
 class biaReproduction : public reproductionMethod<dim,vectorType,evalType,mateSize>{
 	public:
 		typedef _selectionMethod<dim,vectorType,evalType,mateSize> specSelMethod;
@@ -75,13 +76,28 @@ class biaReproduction : public reproductionMethod<dim,vectorType,evalType,mateSi
 		//now we have mating pool full of candidates to crossover
 		//1-point crossover
 		int cross;
-		int j;
-		for(int i=0; i<offsprSize; i++){
+		int i,j,k;
+		unsigned distMax,yMax;
+		for(i=0; i<offsprSize; i++){
 			//pick crossover point (aligned to whole atom positions)
 			cross = (rand() % (dim/2))*2;
 			//do crossover
 			for(j=0; j<cross; j++) offspr[i]->components[j] = mate[2*i]->components[j];
-			for(;j<dim; j++)	   offspr[i]->components[j] = mate[2*i+1]->components[j];
+			//parasitism
+			if(rand()%100 > parasitismRate){
+
+				//ok, normal crossover
+				for(;j<dim; j++) offspr[i]->components[j] = mate[2*i+1]->components[j];
+
+			}else{ //crosover with appropriate parasite
+				//find candidate extreme values
+				distMax = abs(mate[2*i]->components[0]);
+				for(k=1;k<dim; k++){
+					if(distMax < abs(mate[2*i]->components[k])) distMax = abs(mate[2*i]->components[k]);
+				}
+				//crossover with parasite
+				for(;j<dim; j++) offspr[i]->components[j] = (rand()%((unsigned)(2*distMax*1.1))) - (unsigned)(distMax*1.1);
+			}
 		}
 		//center to weight center?? or wait after mutation
 		return 1;
