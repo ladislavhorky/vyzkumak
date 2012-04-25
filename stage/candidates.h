@@ -71,7 +71,7 @@ class largeSingleObjectiveCandidate : public singleObjectiveCandidate<dim,vector
 	public:
 	typedef largeSingleObjectiveCandidate<dim,vectorType,evalType,numChanges> specLarSinCandidate; 
 
-	unsigned changes[numChanges];
+	int changes[numChanges];
 	vectorType deltas[numChanges];
 
 	specLarSinCandidate & operator=(const specLarSinCandidate &rval){

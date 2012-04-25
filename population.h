@@ -39,7 +39,7 @@ class abstractBasicPopulation{
 	protected:
 	typedef basicCandidate<dim,vectorType> specBasCandidate; 
 
-	unsigned const populationSize, offspringSize, bestArcSize;
+	const int populationSize, offspringSize, bestArcSize;
 	specBasCandidate **pop, **offspr, **best;
 	double gridStep;	//?
 	vectorType upperLimit[dim],lowerLimit[dim];		//grid mesh
@@ -54,7 +54,7 @@ class abstractBasicPopulation{
 	template<int,typename,int,typename> friend class evaluationMethod;*/
 
 	public:
-	abstractBasicPopulation<dim,vectorType>(unsigned pSize, unsigned oSize, unsigned bestA):
+	abstractBasicPopulation<dim,vectorType>(int pSize, int oSize, int bestA):
 	  populationSize(pSize),offspringSize(oSize),bestArcSize(bestA){
 		pop = new specBasCandidate*[populationSize+offspringSize];		//for possible sorting in selection
 		offspr = &(pop[populationSize]);								//to allow parent-child comparison
@@ -83,7 +83,7 @@ class basicSingleObjPopulation : public abstractBasicPopulation<dim,vectorType>{
 	public:
 	typedef singleObjectiveCandidate<dim,vectorType,evalType> specSingleObjCandidate; 
 
-	basicSingleObjPopulation<dim,vectorType,evalType>(unsigned pSize, unsigned oSize, unsigned bestA) :
+	basicSingleObjPopulation<dim,vectorType,evalType>(int pSize, int oSize, int bestA) :
 		abstractBasicPopulation<dim,vectorType>(pSize,oSize,bestA){}
 
 	inline specSingleObjCandidate** GetPopulation(){return reinterpret_cast<specSingleObjCandidate**>(pop);}
@@ -95,7 +95,7 @@ template<int dim, typename vectorType, typename evalType>
 class basicSingleObjAnnePopulation : public  basicSingleObjPopulation<dim,vectorType,evalType>{
 	double temperature;
 	public:
-	basicSingleObjAnnePopulation<dim,vectorType,evalType>(unsigned pSize, unsigned oSize, unsigned bestA, double t) :
+	basicSingleObjAnnePopulation<dim,vectorType,evalType>(int pSize, int oSize, int bestA, double t) :
 		basicSingleObjPopulation<dim,vectorType,evalType>(pSize,oSize,bestA), temperature(t){}
 };
 
@@ -129,7 +129,7 @@ class testingClassicGOPopulation : public basicSingleObjPopulation<dim,vectorTyp
 	public:
 	testingClassicGOPopulation<dim,vectorType,evalType,
 		_evaluationMethod,_mutationMethod,
-		_mergingMethod,_reproductionMethod>(unsigned pSize, unsigned oSize, unsigned bestA) :
+		_mergingMethod,_reproductionMethod>(int pSize, int oSize, int bestA) :
 		basicSingleObjPopulation<dim,vectorType,evalType>(pSize,oSize,bestA){}
 
 	bool Create(){
@@ -140,27 +140,76 @@ class testingClassicGOPopulation : public basicSingleObjPopulation<dim,vectorTyp
 
 		//create initial population
 		#define bigrand() (rand() | rand() << 16)
-		for(unsigned i=0;i<populationSize; i++){
+		for(int i=0;i<populationSize; i++){
 			pop[i] = new specSingleObjCandidate();
-			for(unsigned j=0; j<dim; j++){
-				pop[i]->components[j] = (rand()-RAND_MAX/2)/2; //bigrand();
+			for(int j=0; j<dim; j++){
+				pop[i]->components[j] = (rand()-RAND_MAX/2); //bigrand();
 			}
 		}
 		//initialize offspring
-		for(unsigned i=0;i<offspringSize; i++){
+		for(int i=0;i<offspringSize; i++){
 			offspr[i] = new specSingleObjCandidate();
+			for(int j=0; j<dim; j++){
+				offspr[i]->components[j] = 0;
+			}
 		}
 		//initially evaluate population
 		eva.PerformEvaluation(true);
+		
+		//prepare graphics
+		InitGraphics();
 		return true;
 	}
 
+	bool BadCand(){
+		for(int i=0;i<populationSize+offspringSize;i++){
+			for(int j=0;j<dim;j++){
+				if(pop[i]->components[j] == -2147483648) return true;
+			}
+		}
+		return false;
+	}
+	void PrintPop(){
+		cout.fill(' ');
+		cout <<'\n';
+		for(int i=0;8*i < populationSize;i++){
+			for(int k=0;k<dim;k++){
+				for(int j=0;j<8;j++){
+					if(i*8+j >= populationSize){cout<<'\n';break;}
+					cout <<setw(10)<<right<< GetPopulation()[i*8+j]->components[k];
+				}
+			}
+			cout << "--------------------------------\n";
+		}
+	}
+
 	bool NextGeneration(){
-		
+		char b;
+		//PrintPop();
 		rep.PerformReproduction();
+		if(BadCand()){
+			cout << "BAD after reproduction";
+			//PrintPop();
+			cin >> b;
+		}
 		mut.PerformMutation();
+		if(BadCand()){
+			cout << "BAD after mutation";
+			//PrintPop();
+			cin >> b;
+		}
 		eva.PerformEvaluation();
+		if(BadCand()){
+			cout << "BAD after evaluation";
+			//PrintPop();
+			cin >> b;
+		}
 		mer.PerformMerge();
+		if(BadCand()){
+			cout << "BAD after merge";
+			//PrintPop();
+			cin >> b;
+		}
 		//print info about population
 		cout.precision(2);
 		cout << fixed;
@@ -169,6 +218,7 @@ class testingClassicGOPopulation : public basicSingleObjPopulation<dim,vectorTyp
 			//if(i==populationSize) cout << "---\n";
 			cout << /*GetPopulation()[i]->components[0] << " " <<*/ GetPopulation()[i]->fitness << '\n';
 		}
+		DrawScene<dim,vectorType,evalType>(populationSize,pop);
 		return true;
 	}
 

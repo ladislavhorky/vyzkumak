@@ -42,7 +42,7 @@ class plainCopyReproduction : public reproductionMethod<dim,vectorType,evalType,
 	int PerformReproduction(){
 		if(mateSize != offsprSize) return PARAMETER_MISMATCH;
 
-		for(unsigned i=0; i<mateSize; i++){
+		for(int i=0; i<mateSize; i++){
 			*(offspr[i]) = *(mate[i]);
 		}
 		return 1;
@@ -77,7 +77,7 @@ class biaReproduction : public reproductionMethod<dim,vectorType,evalType,mateSi
 		//1-point crossover
 		int cross;
 		int i,j,k;
-		unsigned distMax,yMax;
+		vectorType distMax;
 		for(i=0; i<offsprSize; i++){
 			//pick crossover point (aligned to whole atom positions)
 			cross = (rand() % (dim/2))*2;
@@ -95,11 +95,10 @@ class biaReproduction : public reproductionMethod<dim,vectorType,evalType,mateSi
 				for(k=1;k<dim; k++){
 					if(distMax < abs(mate[2*i]->components[k])) distMax = abs(mate[2*i]->components[k]);
 				}
-				//crossover with parasite
-				for(;j<dim; j++) offspr[i]->components[j] = (rand()%((unsigned)(2*distMax*1.1))) - (unsigned)(distMax*1.1);
+				distMax++; //in rare zero case 
+				for(;j<dim; j++) offspr[i]->components[j] = (rand()%((vectorType)(2*distMax*1.1))) - (vectorType)(distMax*1.1);
 			}
 		}
-		//center to weight center?? or wait after mutation
 		return 1;
 	}
 };

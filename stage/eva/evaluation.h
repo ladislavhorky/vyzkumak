@@ -119,19 +119,19 @@ signed long *inverseHilbMtrxNorm<dim,vectorType,evalType>::inverseHilbert = NULL
 
 template<int dim, typename vectorType, typename evalType>
 class moleculePotentialEnergy: public evaluationMethod<dim,vectorType,evalType>{
-	static const int dist[81];
-
 	//get target distance between points x-th and y-th (represented in candidate by 
 	//TWO coordinates) from matrix
-	inline long GetDist(unsigned x, unsigned y){return dist[x*(dim/2) + y];}
+	inline long GetDist(int x, int y){return dist[x*(dim/2) + y];}
 
 	public:
+	static const int dist[81];
+
 	moleculePotentialEnergy<dim,vectorType,evalType>(){};
 
 	int EvaluateSet(specSingleObjCandidate **set, int size){
 		double strain;
 		double dist1,dist2;
-		unsigned i,j,k;
+		int i,j,k;
 		for(i=0;i<size;i++){
 			strain = 0;
 			for(j=0;j<dim/2;j++){
@@ -179,7 +179,17 @@ class moleculePotentialEnergy: public evaluationMethod<dim,vectorType,evalType>{
 //non-negative, symetric
 template<int dim, typename vectorType, typename evalType>
 const int moleculePotentialEnergy<dim,vectorType,evalType>::dist[] =
-{0,  200,0,  0,  0,  0,  200,0,  0,
+{0,  200,0,  200,0,  0,  200,0,  200,
+ 200,0,  200,0,  0,  0,  0,  0,	 0,
+ 0,  200,0,  200,0,  0,  0,  0,  0,
+ 200,0,  200,0,  200,0,  200,0,  0,
+ 0,  0,  0,  200,0,  200,0,  0,  0,
+ 0,  0,  0,  0,  200,0,  200,0,  0,
+ 200,0,  0,  200,0,  200,0,  200,0,
+ 0,  0,  0,  0,  0,  0,  200,0,  200,
+ 200,0,  0,  0,  0,  0,  0,  200,0};
+	
+/*{0,  200,0,  0,  0,  0,  200,0,  0,
  200,0,  200,0,  200,0,  0,  0,	 0,
  0,  200,0,  200,200,0,  0,  0,  0,
  0,  0,  200,0,  200,200,0,  200,0,
@@ -187,7 +197,7 @@ const int moleculePotentialEnergy<dim,vectorType,evalType>::dist[] =
  0,  0,  0,  200,200,0,  200,0,  0,
  200,0,  0,  0,  0,  200,0,  0,	 200,
  0,  0,  0,  200,0,  0,  0,  0,  0,
- 0,  0,  0,  0,  300,0,  200,0,  0};
+ 0,  0,  0,  0,  300,0,  200,0,  0};*/
 
 /*{	  0,  100,  100,
 	100,    0,  100,

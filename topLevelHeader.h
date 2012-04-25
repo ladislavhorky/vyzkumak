@@ -15,7 +15,7 @@
 #include <vyzkumak/stage/candidates.h>
 #include <vyzkumak/population.h>
 
-#include<vyzkumak/stage/initializable.h>
+//#include<vyzkumak/stage/initializable.h>
 
 //stages
 #include <vyzkumak/stage/eva/evaluation.h>
@@ -25,7 +25,8 @@
 #include <vyzkumak/stage/rep/reproduction.h>
 
 //additionals
-#include <vyzkumak/probability.h>
+//#include <vyzkumak/probability.h>
+#include <vyzkumak/graphics/graphics.h>
 
 
 #endif

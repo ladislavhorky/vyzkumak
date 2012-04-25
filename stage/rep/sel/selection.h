@@ -41,7 +41,7 @@ class selectAllMethod : public selectionMethod<dim,vectorType,evalType,mateSize>
 
 		if(popSize != mateSize) return PARAMETER_MISMATCH;
 		mate = pop;				//so all population will be "selected" to the mating pool
-		srand((unsigned)time(NULL));
+		srand((int)time(NULL));
 		return 1;
 	}
 	virtual int PerformSelection(){return 1;}	// do nothing

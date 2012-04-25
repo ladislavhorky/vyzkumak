@@ -65,7 +65,7 @@ class fightPopulation : public mergingMethod<dim,vectorType,evalType>{
 	//typedef initializablePart<dim,vectorType,evalDim,evalType> specInitializable;
 
 	protected:
-	int qsortPartial(unsigned first, unsigned last, unsigned split){
+	int qsortPartial(int first, int last, int split){
 	/*
 		Sorts in ascending order!!
 		Modified qsort - partially sorts array from indice 'first' to indice 'last'
@@ -75,8 +75,8 @@ class fightPopulation : public mergingMethod<dim,vectorType,evalType>{
 		specSingleObjCandidate *tmp;
 
 		//run qsort
-		unsigned pivot, rising, falling;
-		unsigned targetPos = first + split;
+		int pivot, rising, falling;
+		int targetPos = first + split;
 		evalType pivotFit;
 		while(1){
 			//find median of 3 (to be on first+1 pos)
@@ -107,9 +107,9 @@ class fightPopulation : public mergingMethod<dim,vectorType,evalType>{
 	}
 
 	//sorts first cnt candidates in ascending order by insertion sort
-	int insertionSortPartial(unsigned first, unsigned last, unsigned cnt){
+	int insertionSortPartial(int first, int last, int cnt){
 		evalType minFit;
-		unsigned minIdx, i,j;
+		int minIdx, i,j;
 		specSingleObjCandidate *tmp;
 
 		for(i=0;i<cnt;i++){
@@ -156,7 +156,7 @@ class elitismMerge : public fightPopulation<dim,vectorType,evalType>{
 		preserve elite and SWAP the rest -- otherwise some pointers would 
 		be duplicit and pop would be corrupted
 		*/
-		for(unsigned i=eliteCount, j=0; i<popSize; i++,j++){
+		for(int i=eliteCount, j=0; i<popSize; i++,j++){
 			tmp = pop[i];
 			pop[i] = offspr[j];
 			offspr[j] = tmp;
@@ -182,7 +182,7 @@ class elitismMerge : public fightPopulation<dim,vectorType,evalType>{
 //	public:
 //	int Init(specAbstAnnePopulation *pop){ //we need temperature
 //		p=pop;
-//		srand((unsigned)time(NULL));
+//		srand((int)time(NULL));
 //		return 1;
 //	}	
 //	int PerformMerge(){
@@ -190,7 +190,7 @@ class elitismMerge : public fightPopulation<dim,vectorType,evalType>{
 //		specCandidate *tmp;
 //		evalType delta;
 //
-//		for(unsigned i=0; i<p->populationSize; i++){
+//		for(int i=0; i<p->populationSize; i++){
 //			delta = p->pop[i]->fitness() - p->offspr[i]->fitness();
 //			if((delta > 0)||((double)rand()/RAND_MAX < exp(delta/static_cast<specAbstAnnePopulation *>(p)->temperature))){		//minimizing!!
 //				SWAPO_P(i);

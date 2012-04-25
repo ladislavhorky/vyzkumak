@@ -40,14 +40,14 @@ class randomNbDisplace : public mutationMethod<dim,vectorType>{
 	public:
 	int Init(specAbstBasPopulation *p){
 		mutationMethod<dim,vectorType>::Init(p);
-		srand((unsigned)time(NULL));
+		srand((int)time(NULL));
 		return 1;
 	};
 	int PerformMutation(){
 		//component to change -- direction actually
 		int com;
 		int move;
-		for(unsigned i=0; i<offsprSize; i++){
+		for(int i=0; i<offsprSize; i++){
 			com = rand() % dim;
 			move = (rand() & 1)*2 - 1;	//= +-1
 			offspr[i]->components[com] += move;
@@ -68,24 +68,43 @@ class gaussianDisplace : public mutationMethod<dim,vectorType>{
 	public:
 	int Init(specAbstBasPopulation *p){
 		mutationMethod<dim,vectorType>::Init(p);
-		srand((unsigned)time(NULL));
+		srand((int)time(NULL));
 		return 1;
 	};
+
+	bool BadCand(){
+		for(int i=0;i<offsprSize;i++){
+			for(int j=0;j<dim;j++){
+				if(offspr[i]->components[j] == -2147483648) return true;
+			}
+		}
+		return false;
+	}
 
 	//mutates one point
 	int PerformMutation(){
 		#define PI 3.1415926535897932
+		#define MAXR 10000
 		//mutate one point
+
+		char b;
+
 		double R,theta;
 		int pos;
 		for(int i=0; i<offsprSize; i++){
 			if((rand() % 100) > mutRate) continue; // no mutation
-			R = sqrt(-2*log((double)rand()/RAND_MAX))*sigma;
+			// +1 to eliminate NaN, +-INF
+			R = sqrt(-2*log((double)(rand()+1)/(RAND_MAX+1)))*sigma;
 			theta = 2*PI*(double)rand()/RAND_MAX;
 			pos = rand() % (dim/2);
 			//mutate
 			offspr[i]->components[2*pos] += R*cos(theta);
 			offspr[i]->components[2*pos+1] += R*sin(theta);
+		}
+
+		if(BadCand()){
+			cout << "BAD after primal mutation";
+			cin >> b;
 		}
 
 		//normalize ... pertubation done automaticaly by overflow
@@ -94,10 +113,15 @@ class gaussianDisplace : public mutationMethod<dim,vectorType>{
 			wx=wy=0;
 			for(int j=0; j<dim; j+=2) wx += offspr[i]->components[j];
 			for(int j=1; j<dim; j+=2) wy += offspr[i]->components[j];
-			wx /= dim;
-			wy /= dim;
+			wx /= dim/2;
+			wy /= dim/2;
 			for(int j=0; j<dim; j+=2) offspr[i]->components[j] -= wx;
 			for(int j=1; j<dim; j+=2) offspr[i]->components[j] -= wy;
+		}
+
+		if(BadCand()){
+			cout << "BAD after normalisation";
+			cin >> b;
 		}
 
 		//and randomly rotate with mutation rate -- just try
@@ -106,21 +130,28 @@ class gaussianDisplace : public mutationMethod<dim,vectorType>{
 		for(int i=0; i<offsprSize; i++){
 			if((rand() % 100) > mutRate) continue; // no mutation
 			//init rotation matrix
-			R = sqrt(-2*log((double)rand()/RAND_MAX))*0.2;
+			// +1 to eliminate NaN, +-INF
+			R = sqrt(-2*log((double)(rand()+1)/(RAND_MAX+1)))*0.2;
 			theta = 2*PI*(double)rand()/RAND_MAX;
 			//phi with normal distribution.. 0.1 ~ 6 deg.
 			phi = R*cos(theta);
 			rotM[0]=rotM[3] = cos(phi);
 			rotM[1] = -sin(phi);
 			rotM[2] = -rotM[1];
+
 			//rotate every point
-			for(int j=0;j<dim/2;j++){
+			for(int j=0;j<dim/2;j+=2){
 				oldx = offspr[i]->components[2*j];
 				oldy = offspr[i]->components[2*j+1];
 				offspr[i]->components[2*j] =  rotM[0]*oldx + rotM[1]*oldy;
 				offspr[i]->components[2*j+1] =rotM[2]*oldx + rotM[3]*oldy;
 			}
 		}
+		if(BadCand()){
+			cout << "BAD after rotation";
+			cin >> b;
+		}
+
 		return 1;
 	}
 };
