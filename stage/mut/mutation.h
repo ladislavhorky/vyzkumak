@@ -61,8 +61,8 @@ class randomNbDisplace : public mutationMethod<dim,vectorType>{
 
 //-----------------------BIA----------------------------
 
-//bia gaussian mutation (displacement) of one point
-template<int dim, typename vectorType, int sigma, int mutRate>
+//bia gaussian mutation (displacement) of n points
+template<int dim, typename vectorType, int sigma, int mutRate, int maxMutPoints>
 class gaussianDisplace : public mutationMethod<dim,vectorType>{
 
 	public:
@@ -90,22 +90,26 @@ class gaussianDisplace : public mutationMethod<dim,vectorType>{
 		char b;
 
 		double R,theta;
-		int pos;
+		int pos,mutPoints;
 		for(int i=0; i<offsprSize; i++){
 			if((rand() % 100) > mutRate) continue; // no mutation
 			// +1 to eliminate NaN, +-INF
 			R = sqrt(-2*log((double)(rand()+1)/(RAND_MAX+1)))*sigma;
 			theta = 2*PI*(double)rand()/RAND_MAX;
-			pos = rand() % (dim/2);
-			//mutate
-			offspr[i]->components[2*pos] += R*cos(theta);
-			offspr[i]->components[2*pos+1] += R*sin(theta);
+
+			mutPoints = (rand() % maxMutPoints)+1;
+			for(int j=0; j<mutPoints; j++){
+				pos = rand() % (dim/2);
+				//mutate all points with the same value
+				offspr[i]->components[2*pos] += R*cos(theta);
+				offspr[i]->components[2*pos+1] += R*sin(theta);
+			}
 		}
 
-		if(BadCand()){
+		/*if(BadCand()){
 			cout << "BAD after primal mutation";
 			cin >> b;
-		}
+		}*/
 
 		//normalize ... pertubation done automaticaly by overflow
 		long wx,wy;
@@ -119,38 +123,38 @@ class gaussianDisplace : public mutationMethod<dim,vectorType>{
 			for(int j=1; j<dim; j+=2) offspr[i]->components[j] -= wy;
 		}
 
-		if(BadCand()){
+		/*if(BadCand()){
 			cout << "BAD after normalisation";
 			cin >> b;
-		}
+		}*/
 
 		//and randomly rotate with mutation rate -- just try
-		double rotM[4], phi;
-		vectorType oldx, oldy;
-		for(int i=0; i<offsprSize; i++){
-			if((rand() % 100) > mutRate) continue; // no mutation
-			//init rotation matrix
-			// +1 to eliminate NaN, +-INF
-			R = sqrt(-2*log((double)(rand()+1)/(RAND_MAX+1)))*0.2;
-			theta = 2*PI*(double)rand()/RAND_MAX;
-			//phi with normal distribution.. 0.1 ~ 6 deg.
-			phi = R*cos(theta);
-			rotM[0]=rotM[3] = cos(phi);
-			rotM[1] = -sin(phi);
-			rotM[2] = -rotM[1];
+		//double rotM[4], phi;
+		//vectorType oldx, oldy;
+		//for(int i=0; i<offsprSize; i++){
+		//	if((rand() % 100) > mutRate) continue; // no mutation
+		//	//init rotation matrix
+		//	// +1 to eliminate NaN, +-INF
+		//	R = sqrt(-2*log((double)(rand()+1)/(RAND_MAX+1)))*0.3;
+		//	theta = 2*PI*(double)rand()/RAND_MAX;
+		//	//phi with normal distribution.. 0.1 ~ 6 deg.
+		//	phi = R*cos(theta);
+		//	rotM[0]=rotM[3] = cos(phi);
+		//	rotM[1] = -sin(phi);
+		//	rotM[2] = -rotM[1];
 
-			//rotate every point
-			for(int j=0;j<dim/2;j+=2){
-				oldx = offspr[i]->components[2*j];
-				oldy = offspr[i]->components[2*j+1];
-				offspr[i]->components[2*j] =  rotM[0]*oldx + rotM[1]*oldy;
-				offspr[i]->components[2*j+1] =rotM[2]*oldx + rotM[3]*oldy;
-			}
-		}
-		if(BadCand()){
+		//	//rotate every point
+		//	for(int j=0;j<dim/2;j++){
+		//		oldx = offspr[i]->components[2*j];
+		//		oldy = offspr[i]->components[2*j+1];
+		//		offspr[i]->components[2*j] =  rotM[0]*oldx + rotM[1]*oldy;
+		//		offspr[i]->components[2*j+1] =rotM[2]*oldx + rotM[3]*oldy;
+		//	}
+		//}
+		/*if(BadCand()){
 			cout << "BAD after rotation";
 			cin >> b;
-		}
+		}*/
 
 		return 1;
 	}

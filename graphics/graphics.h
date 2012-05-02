@@ -48,7 +48,7 @@ in given scale
 
 template<int dim, typename vectorType, typename evalType>
 inline void DrawCandidate(int x, int y, basicCandidate<dim,vectorType>* cand, double scale){
-	#define DIST(p1,p2) moleculePotentialEnergy<dim,vectorType,evalType>::dist[dim*(p1) + (p2)]
+	#define DIST(p1,p2) moleculePotentialEnergy<dim,vectorType,evalType>::dist[(dim/2)*(p1) + (p2)]
 	#define COORD(idx) (cand->components[(idx)]*scale + CELL_WIDTH/2)
 	
 	int i,j,k;
@@ -56,13 +56,13 @@ inline void DrawCandidate(int x, int y, basicCandidate<dim,vectorType>* cand, do
 	for(i=0;i<dim/2;i++){
 		for(j=i+1;j<dim/2;j++){
 			if(DIST(i,j)){
-				//draw_line(screen,COORD(2*i)+x,COORD(2*i+1)+y,COORD(2*j)+x,COORD(2*j+1)+y,SDL_MapRGB(screen->format, 0,255,0));
+				//draw_line(screen,COORD(2*i)+x,COORD(2*i+1)+y,COORD(2*j)+x,COORD(2*j+1)+y,SDL_MapRGB(screen->format, 0,100,0));
 			}
 		}
 	}
 	//draw circles at atom positions
 	for(i=0;i<dim/2;i++){
-		draw_circle(screen,COORD(2*i)+x,COORD(2*i+1)+y,2,SDL_MapRGB(screen->format, 255,0,0));
+		draw_circle(screen,COORD(2*i)+x,COORD(2*i+1)+y,2,SDL_MapRGB(screen->format, 255,255,255));
 	}
 }
 
